@@ -1,0 +1,46 @@
+version: "3.5"
+
+services: 
+
+    postgres:
+        image: postgres:10
+        restart: always
+        environment:
+          POSTGRES_DB: metabase
+          POSTGRES_USER: metabase_usr
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    metabase:
+        image: metabase/airton
+        depends_on: 
+            - postgres
+        ports: 
+            - "3000:3000"
+        restart: "always"
+        environment: 
+            JAVA_TIMEZONE: America/Sao_Paulo
+            MB_DB_TYPE: postgres
+            MB_DB_DBNAME: metabase
+            MB_DB_PORT: 5432
+            MB_DB_USER: metabase_usr
+            MB_DB_PASS: ${POSTGRES_PASSWORD}
+            MB_DB_HOST: postgres
+            
+    pgadmin:
+        depends_on:
+            - postgres
+        image: dpage/pgadmin4
+        ports:
+            - "3001:80"
+        restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: mail@example.com
+            PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+
+    setup:
+        image: ubuntu/setup
+        command: "./usr/local/setup.sh"
+        depends_on: 
+            - postgres
+            - metabase
+            - pgadmin

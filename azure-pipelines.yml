@@ -1,0 +1,56 @@
+- stage: deploymetabase
+  displayName: Deploy Metabase Instance
+  jobs:
+    - deployment: app_yamls
+      displayName: App Yamls
+      environment: "Hmle"
+      stategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: Kubernetes@1
+                displayname: Deploy App yaml
+                inputs:
+                  connectionType: Kubernetes Service Connection
+                  kubernetesServiceEndpoint: "$(K8S_SERVICE_ENDPOINT_DEV)"
+                  command: apply
+                  outputFormat: name
+                  arguments: "-Rf repository/yamls/"
+
+
+- stage: setupmetabase
+  displayName: Setup Metabase
+  jobs:
+    - deployment: metabase
+      displayName: Metabase
+      environment: "Homolog"
+      strategy:
+        runOnce:
+          deploy:
+            steps:           
+              - template: pipeline-templates/metabase-setup-steps.yaml    
+                parameters:
+                  userldap:
+                  - username: "metabase.metabase@metabase.com.br"
+                    password: "12345678"
+                    sitename: "Empresa"
+                    firstname: "Fulano"
+                    lastname: "ciclano"   
+                    ldapenabled: "true"
+                    ldaphost: "hostldap"
+                    ldapport: "5433"
+                    ldapsecurity: "ssl"
+                    ldapbinddn: "bin dn ldap"
+                    ldappassword: "password"
+                    ldapuserbase: "base usuarios"
+                    ldapuserfilter: "filtro usuarios"
+                  database:
+                  - engine: "sqlserver"
+                    username: "metabase.metabase@metabase.com.br"
+                    password: "12345678"
+                    name: "nome servidor"
+                    host: "10.10.10.10"
+                    port: "1433"
+                    database: "base"
+                    userdb: "usuariobanco"
+                    dbpassword: "1234567"

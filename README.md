@@ -25,4 +25,4 @@ Deploy Metabase com LoadBalance, Setup automatizado via API - Kubernetes. Estudo
 ## 🎯 Backlog:
 - Atribuir na pipeline de deploy um step para variavel de ambiente e alimentar o shell script de SETUP com essas variaveis. 
 - Criação de paineis/dashboards de forma automatica no script de Setup. 
-- Submeter uma base de dados example para os paineis/dashboards do Setup.
+- Submeter uma base de dados exemplo para os paineis/dashboards do Setup.

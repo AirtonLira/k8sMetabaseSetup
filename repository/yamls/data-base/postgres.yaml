@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  labels:
+    name: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: database
+  template:
+    metadata:
+      labels:
+        name: database
+    spec:
+      containers:
+      - name: database
+        image: postgres:13
+        envFrom:
+        - configMapRef:
+            name: postgres-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: database
+spec:
+  selector:
+    name: database
+  ports:
+  - port: 5432
+    targetPort: 5432

@@ -1,0 +1,44 @@
+parameters:
+  - name: userldap
+    type: object
+  - name: database
+    type: object
+  
+steps:
+- ${{ each user in parameters.userldap }}:
+  - script: |-
+          token-setup=$(curl -X GET curl -H "Content-Type: application/json" http://localhost:3000/api/session/properties | grep -Po '"setup-token": *\K"[^"]*"')
+  
+          token-session=$(curl -X POST \
+          -H "Content-Type: application/json" \
+          -d '{"token":"${token-setup}","prefs":{"site_name":"${{ userldap.sitename }}","site_locale":"pt","allow_tracking":"true"},"database":null,"user":{"first_name":"${{ userldap.firstname }}","last_name":"${{ userldap.lastname }}","email":"${{ userldap.username }}","password":"${{ userldap.password }}","site_name":"${{ userldap.sitename }}"}}' \
+          http://localhost:3000/api/setup/ | grep -Po '"id": *\K"[^"]*"' )
+          
+        
+          
+          
+          curl -X PUT \
+          -H "Content-Type: application/json"  -H 'X-Metabase-Session:"${token-session}" ' \
+          -d '{"ldap-enabled": true${{ userldap.ldapenabled }},"ldap-host": "${{ userldap.ldaphost }}","ldap-port": "${{ userldap.ldapport }}","ldap-security": "${{ userldap.ldapsecurity }}","ldap-bind-dn": "${{ userldap.ldapbinddn }}","ldap-password": "${{ userldap.ldappassword }}","ldap-user-base": "${{ userldap.ldapuserbase }}","ldap-user-filter": "${{ userldap.ldapuserfilter }}"}' \
+          http://localhost:3000/api/setting/
+  
+
+    -|
+    
+    
+- ${{ each db in parameters.database }}:
+  - script: |-
+  
+          token-session = $(curl -X POST \
+          -H "Content-Type: application/json" \
+          -d '{"username":"${{ db.username }}","password":"${{ db.password }}"}' \
+          http://localhost:3000/api/session | grep -Po '"id": *\K"[^"]*"' )
+          
+          curl -X POST \
+          -H "Content-Type: application/json"  -H 'X-Metabase-Session:"${token-session}" ' \
+          -d '{"engine": "${{ db.engine }}","name": "${{ db.name }}","details": {"host": "${{ db.host }}","port": "${{ db.port }}","db": "${{ db.database }}","user": "${{ db.userdb }}","password": "${{ db.dbpassword }}"}}' \
+          http://localhost:3000/api/database
+                
+
+    -|
+    displayName: "Replace ${{ user.sitename }}"

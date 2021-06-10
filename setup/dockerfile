@@ -1,0 +1,9 @@
+FROM ubuntu:16.04
+
+RUN yes | apt install bash 
+RUN yes | apt update
+RUN yes | apt install curl 
+
+COPY ./setup.sh /usr/local
+
+ENTRYPOINT [ "bash" ]
